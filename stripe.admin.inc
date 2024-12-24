@@ -74,7 +74,7 @@ function stripe_admin_settings_form($form, $form_state) {
         'wrapper' => 'stripe-connect-results',
         'method' => 'append',
       ),
-      '#suffix' => '<div id="stripe-connect-results"></div>',
+      '#prefix' => '<div id="stripe-connect-results"></div>',
     );
   }
 
@@ -257,10 +257,29 @@ function stripe_admin_settings_form_submit($form, &$form_state) {
  */
 function stripe_test_connection($form, $form_state) {
   $account = stripe_api_call('account', 'retrieve');
-  if ($account && $account->email) {
-    return 'Success! Account email: ' . $account->email;
+
+  $messages = array();
+
+  // Connection worked.
+  if ($account) {
+    $messages[] = t('SUCCESS: connected to stripe accunt :no.', array(':no' => $account->id));
+
+    if ($account->livemode) {
+      $messages[] = t('This account is live.');
+    }
+    else {
+      $messages[] = t('WARNING: This account is not yet live.');
+    }
+
+    // @todo add more helpful information.
   }
+
   else {
-    return 'Error! Could not connect!';
+    $messages[] = 'Error! Could not connect!';
   }
+
+  $return = '<strong>' . t('Test results:') . '</strong>';
+  $return .= theme('item_list', array('items' => $messages));
+
+  return $return;
 }
