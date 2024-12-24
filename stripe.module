@@ -41,9 +41,13 @@ function stripe_config_info() {
  */
 function stripe_permission() {
   return array(
+    'administer stripe' => array(
+      'title' => t('Administer Stripe settings'),
+      'description' => t('Allows access to configure general stripe settings.'),
+    ),
     'edit stripe api settings' => array(
-      'title' => t('Administer Stripe API settings'),
-      'description' => t('Grants access to Stripe credentials and settings.'),
+      'title' => t('Access Stripe API Keys'),
+      'description' => t('Allows access to view and change Stripe API Keys.'),
     ),
   );
 }
@@ -57,7 +61,7 @@ function stripe_menu() {
     'title' => 'Stripe',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('stripe_admin_settings_form'),
-    'access arguments' => array('edit stripe api settings'),
+    'access arguments' => array('administer stripe'),
     'description' => 'Configure Stripe credentials.',
     'file' => 'stripe.admin.inc',
   );

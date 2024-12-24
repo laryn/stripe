@@ -115,3 +115,19 @@ function stripe_update_1100() {
   $config->clear('bitcoin');
   $config->save();
 }
+
+/**
+ * Grant the new administer stripe permission to all who could access API keys.
+ */
+function stripe_update_1101() {
+  $config_names = config_get_names_with_prefix('user.role');
+  foreach ($config_names as $config_name) {
+    $config = config($config_name);
+    $permissions = $config->get('permissions');
+    if (in_array('edit stripe api settings', $permissions)) {
+      $permissions[] = 'administer stripe';
+      $config->set('permissions', $permissions);
+      $config->save();
+    }
+  }
+}

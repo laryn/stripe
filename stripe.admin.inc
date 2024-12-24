@@ -14,6 +14,9 @@ function stripe_admin_settings_form($form, $form_state) {
   $form['api'] = array(
     '#type' => 'fieldset',
     '#title' => t('Stripe API Settings'),
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+    '#access' => user_access('edit stripe api settings'),
   );
 
   $form['api']['mode'] = array(
@@ -62,14 +65,6 @@ function stripe_admin_settings_form($form, $form_state) {
     '#default_value' => $config->get('log_webhooks'),
   );
 
-  $form['api']['link'] = array(
-    '#markup' => t('Stripe resources: !dashboard | !api_keys | !docs<br /><br />', array(
-      '!dashboard' => l(t('Dashboard'), 'https://dashboard.stripe.com', array('attributes' => array('target' => '_blank'))),
-      '!api_keys' => l(t('API Keys'), 'https://dashboard.stripe.com/account/apikeys', array('attributes' => array('target' => '_blank'))),
-      '!docs' => l(t('Docs'), 'https://stripe.com/docs/api', array('attributes' => array('target' => '_blank'))),
-    )),
-  );
-
   if (stripe_get_secret_key()) {
     $form['api']['stripe_test'] = array(
       '#type' => 'button',
@@ -83,10 +78,22 @@ function stripe_admin_settings_form($form, $form_state) {
     );
   }
 
+  $items = array(
+    l(t('Dashboard'), 'https://dashboard.stripe.com', array('attributes' => array('target' => '_blank'))),
+    l(t('API Keys'), 'https://dashboard.stripe.com/account/apikeys', array('attributes' => array('target' => '_blank'))),
+    l(t('Docs'), 'https://stripe.com/docs/api', array('attributes' => array('target' => '_blank'))),
+  );
+  $list = theme('item_list', array('items' => $items));
+
+  $form['api']['resources'] = array(
+    '#markup' => t('<strong> More Stripe resources</strong>') . $list,
+  );
+
   // Image type.
   $form['image'] = array(
     '#type' => 'fieldset',
     '#title' => t('Default image'),
+    '#collapsible' => TRUE,
   );
   $form['image']['default_image_type'] = array(
     '#type' => 'radios',
@@ -134,6 +141,7 @@ function stripe_admin_settings_form($form, $form_state) {
   $form['checkout'] = array(
     '#type' => 'fieldset',
     '#title' => t('Checkout Settings'),
+    '#collapsible' => TRUE,
     '#tree' => TRUE,
   );
   $default_name = $config->get('name');
