@@ -66,7 +66,7 @@ function stripe_menu() {
     'file' => 'stripe.admin.inc',
   );
   $items['admin/config/services/stripe/settings'] = array(
-    'title' => 'API Settings',
+    'title' => 'Stripe Settings',
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'weight' => -10,
   );
@@ -94,7 +94,7 @@ function stripe_incoming_webhook() {
         '@data' => $input,
       ), WATCHDOG_ERROR);
       // This webhook event is invalid.
-      drupal_add_http_header('Status', '403 Forbidden');
+      backdrop_add_http_header('Status', '403 Forbidden');
       print 'Forbidden';
       exit;
     }
@@ -207,16 +207,47 @@ function stripe_load_library() {
 }
 
 /**
+ * Get the stripe key(s).
+ *
+ * @param string $type
+ *   The type of the key to retrieve, either 'secret' or 'publishable'
+ *   (optional).
+ * @param string $mode
+ *   The keys set to use, either 'test' or 'live'. Defaults to the value of the
+ *   'stripe_key_status' variable.
+ *
+ * @return array|string
+ *   If $type is NULL, an array containing both the secret and publishable keys.
+ *   Otherwise, the request keys.
+ */
+function stripe_get_key($type = NULL, $mode = NULL) {
+  $keys = backdrop_static(__FUNCTION__, array());
+  if ($mode === NULL) {
+    $mode = config_get('stripe.settings', 'mode');
+  }
+  if (empty($keys[$mode])) {
+    $keys[$mode] = array(
+      'secret' => stripe_get_secret_key($mode),
+      'publishable' => stripe_get_public_key($mode),
+    );
+  }
+  return ($type === NULL) ? $keys[$mode] : (isset($keys[$mode][$type]) ? $keys[$mode][$type] : NULL);
+}
+
+/**
  * Returns the Stripe API secret key.
+ *   Use stripe_get_key() to benefit from a static cache of all keys.
  *
  * @param string $mode
  *   Stripe mode, either 'live' or 'test'. Leave blank to use the active mode.
  *
  * @return string
  *   Returns the secret key.
+ *
+ * @see stripe_get_key().
  */
 function stripe_get_secret_key($mode = '') {
-  if (!$mode) {
+  if (empty($mode)) {
     $mode = config_get('stripe.settings', 'mode');
   }
   return config_get('stripe_secret.settings', $mode . '_secret_key');
