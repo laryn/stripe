@@ -66,14 +66,14 @@ function stripe_requirements($phase) {
 
     // Check for the Stripe PHP library.
     $stripe = stripe_load_library();
-    if ($stripe['included']) {
+    if (isset($stripe['included']) && $stripe['included']) {
       $requirements['stripe_library'] = array(
         'title' => $t('Stripe PHP library'),
         'value' => $t('Using included Stripe PHP library (7.29.0)'),
         'severity' => REQUIREMENT_OK,
       );
     }
-    elseif ($stripe['loaded']) {
+    elseif (isset($stripe['loaded']) && $stripe['loaded']) {
       $requirements['stripe_library'] = array(
         'title' => $t('Stripe PHP library'),
         'value' => $t('Possible conflict'),
